@@ -2,17 +2,18 @@ import "./index.css";
 import RequestHandler from "../RequestHandler";
 import MyModal from "../MyModal";
 import MissionForm from "../MissionForm";
-import { Button, Space, Table, Input, Empty } from "antd";
+import { Button, Space, Table, Input, Empty, message } from "antd";
 import { useSelector, useDispatch } from "react-redux";
+import { getListData } from "../../apis";
+import { debounce } from "lodash";
+import React from "react";
+
 import {
   DataType,
   initMission,
   delMission,
   addMission,
 } from "../../store/modules/missionStore";
-import { getListData } from "../../apis";
-import { debounce } from "lodash";
-import React from "react";
 
 const { Column } = Table;
 
@@ -60,17 +61,28 @@ const ActionList = ({
   handleMissionAction,
   filterMission,
 }: ActionListProps) => {
+  const [messageApi, contextHolder] = message.useMessage();
+
   // 删除任务
-  const onDelMission = (_: any, record: DataType) => (
-    <Space size="middle">
-      <Button
-        type="link"
-        onClick={() => handleMissionAction("delMission", { key: record.key })}
-      >
-        删除
-      </Button>
-    </Space>
-  );
+  const onDelMission = (_: any, record: DataType) => {
+    const onDel = () => {
+      handleMissionAction("delMission", { key: record.key });
+      messageApi.open({
+        type: "success",
+        content: "删除成功",
+      });
+    };
+
+    return (
+      <>
+        <Space size="middle">
+          <Button type="link" onClick={() => onDel()}>
+            删除
+          </Button>
+        </Space>
+      </>
+    );
+  };
 
   const emptyText = () => {
     return <Empty description="暂无数据" />;
@@ -78,6 +90,7 @@ const ActionList = ({
 
   return (
     <>
+      {contextHolder}
       <Space
         style={{
           marginBottom: 16,
